@@ -1,0 +1,28 @@
+\documentclass[english]{article}
+\usepackage{legbib}
+\
+\addbibresource{test.bib}
+\usepackage{lipsum}
+
+% which counsel will be moving depends, so these
+
+\begin{document}
+
+\begin{refsection}
+\noindent
+\nocite{counsel1}
+\printbibliography[type=counsel, heading=noheading]
+\end{refsection}
+
+\begin{center}\Huge
+SOME CAPTION\end{center}
+
+\lipsum[1]
+
+\begin{refsection}
+\noindent
+\nocite{counsel2}
+\printbibliography[type=counsel, heading=noheading]
+\end{refsection}
+
+\end{document}

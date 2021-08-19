@@ -1,0 +1,27 @@
+\documentclass[english]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{expl3}
+\usepackage{legbib}
+\
+\addbibresource{test.bib}
+
+\def\mymacro{p532}
+
+\begin{document}
+
+First \cite{opiniontwombly} to get ibid everywhere.
+
+\begin{itemize}
+\item Page citation \texttt{1}: \cite[5]{opiniontwombly}.
+\item Page non-numeric citation \texttt{1}: \cite[5(a)]{opiniontwombly}.
+\item Range citation \texttt{1}: \cite[1--5]{opiniontwombly}.
+\item Range non-numeric citation \texttt{1--5(a)}: \cite[1--5(a)]{opiniontwombly}.
+\item Multi range non-numeric citation \texttt{1--5(a), 7(a)--8(b)}: \cite[1--5(a), 7(a)--8(b)]{opiniontwombly}.
+\item Citation with control sequences \texttt{\string\mymacro}: \cite[\mymacro]{opiniontwombly}.
+\item Citation with special characters \texttt{\string\P 32(a),\string\S 3}: \cite[\P 32a,\S 3]{opiniontwombly}.
+\item Citation with special characters again \texttt{\string\P 21(a),\string\S 5}: \cite[\P 21a,\S 5]{opiniontwombly}.
+\end{itemize}
+
+\printbibliography[title={Table of Cases}]
+
+\end{document}

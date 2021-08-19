@@ -1,0 +1,17 @@
+\documentclass[english]{article}
+\usepackage[exhibitinclude=true]{legbib}
+\addbibresource{test.bib}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\def\suppdir{/home/david/work/repos/legallatex/legbib/test}
+
+\begin{document}
+
+Refer to exhibit \cite{image1} and, not a labelnumber citation
+\cite{opiniontwombly}.  Here is a multipage document exhibit \cite{doc1}. Then
+\cite{image2}. Here is a text document \cite{text1}.
+
+\printbibliography[title={Exhibits},type=exhibit]
+
+\end{document}

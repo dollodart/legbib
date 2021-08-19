@@ -1,0 +1,37 @@
+\documentclass[english]{article}
+\usepackage{legbib}
+\addbibresource{test.bib}
+\usepackage{lipsum}
+
+\begin{document}
+
+
+My citation is \cite{opinionmarbvmad}.
+
+\lipsum[1]
+
+And \cite{opinionbrownvboard}. 
+
+\lipsum[2]
+
+And \cite{opiniontwombly}. I repeat the previous citation
+\cite{opiniontwombly}. Now with different pages, \cite[1--5]{opiniontwombly}
+and \cite[6--8]{opiniontwombly}. This next citation is the same case but not
+the opinion (should be idem) \cite{bellatlanticvtwombly}. Now back to the first
+citation: \cite{opinionmarbvmad}. And ibid of that: \cite{opinionmarbvmad}.
+
+\newpage
+
+Even though this is the same citation as before, since it's on a new page it shouldn't be ibid: \cite{opinionmarbvmad}.
+
+\printbibliography[title={Table of Cases}]
+
+% note: motions and other documents don't appear beneath the ones they inherit
+% because of the dynamically modified presort key.  In the work flow as given
+% in Figure 1: Overview of Biber’s main functional units of the biber manual
+% source mapping takes place before xref, so it should work and I don't know
+% why it doesn't. Anyway, considering the different proceedings in an external
+% case as separate sources is dubious, even if one considers different
+% proceedings in the present case as (obviously) separate sources.
+
+\end{document}

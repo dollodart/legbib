@@ -1,0 +1,19 @@
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{csquotes}
+\usepackage{legbib}
+\
+\addbibresource{test.bib}
+
+\usepackage{lipsum}
+
+\errorcontextlines=15
+
+\begin{document}
+
+Bib string law citation is \cite{testbibstring}.
+Bib string without explicit \texttt{\textbackslash bibstring} test is \cite{testbibstringnoexplicit}.
+
+\printbibliography[title={Table of Cases}]
+
+\end{document}

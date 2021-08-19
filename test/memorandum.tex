@@ -1,0 +1,28 @@
+\documentclass[english]{article}
+\usepackage{legbib}
+\
+\addbibresource{test.bib}
+
+\begin{document}
+
+At first there was \cite{memo1}. Then there was \cite{memo2} criticizing
+\cite{memo1}. Then there was \cite{memo3} criciticsing the criticisms in
+\cite{memo2} of \cite{memo1}. The Judge must now rule on \cite{memo1},
+\cite{memo2}, and \cite{memo3}.
+
+Let's check how well it's formatted:
+
+\begin{itemize}
+\item \cite{memo1}.
+\item Mot.\ Dism..
+\item \cite{memo2}.
+\item Resp.\ Opp.\ Mot.\ Dism..
+\item \cite{memo3}.
+\item Rep.\ Supp.\ Mot.\ Dism..
+\end{itemize}
+
+Biblatex by default absorbs following periods as part of its punctuation buffer. While some stylists agree that an abbreviation dot does ``double duty'' as a sentence period, this isn't logical punctuation. So that may be turned off with \texttt{\string\bibsentence} in the citation driver.
+
+\printbibliography
+
+\end{document}

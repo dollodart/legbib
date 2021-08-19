@@ -1,0 +1,31 @@
+\documentclass[english]{article}
+\usepackage{legbib}
+\
+\addbibresource{test.bib}
+\usepackage{lipsum}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+% though called categories.tex, actually tests filters.
+% entries are arbitrarily assigned categories by their keys, whereas filters can act on some properties like entry type
+
+\begin{document}
+
+\cite{fdcstatute}
+\cite{lanhamact}
+\cite{communicationsact}
+\cite{restatetrusts}
+\cite{restatelawlawyer}
+\cite{restateproperty}
+\cite{mybibrelated}
+\cite{tenthrelated}
+\cite{supremerelated}
+\cite{casemarbvmad}
+\cite{brownvboard}
+\cite{bellatlanticvtwombly}
+
+\printbibliography[filter=cases, title={Case Law}]
+\printbibliography[filter=law, title={Law}]
+\printbibliography[filter=otherauthorities, title={Other Authorities}]
+
+\end{document}

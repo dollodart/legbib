@@ -1,0 +1,373 @@
+% see User Guide/Standard Styles/Extended Name Format
+% but that won't be backward compatible with bibtex users
+
+% note: dates are only available in ISO8601 format
+% some fields are tested if the whole entry is a bibstring, so you don't have to specify
+% e.g., venue={supremecourt} is as valid as venue={\bibstring{supremecourt}}
+% mixed fields require bibstring escape, though, like venue={\bibstring{supremecourt}, appelate division} or similar
+% it wouldn't be difficult to implement something which iterates through
+
+%% test data for statutes (from Indigo Book R16.1.2)
+@statute{fdcstatute,
+  name={Federal Food, Drug, and Cosmetic Act},
+  title={21},
+  code={U.S.C.},
+  no={387},
+  year={2012}
+}
+
+@statute{lanhamact,
+  name={Lanham (Trademark) Act},
+  title={15},
+  code={U.S.C.},
+  no={1051--1141n}, % might be a problem with the n here for page ranges (see \noop? other things used in cite command)
+  year={2012}
+}
+
+@statute{communicationsact,
+  name={Communications Act of 1934},
+  title={47},
+  code={U.S.C.},
+  no={223},
+  year={2012},
+  %can't include & Supp.~I 2013 as that is not an integer field
+}
+
+%% test data for restatements (from Indigo book R18.2.1)
+
+% note all restatements are published by ALI, so if this field is blank, the formatting will include it
+% TODO: use cross-ref for child citations? Lot of redundant printing if many sections taken from the same restatement
+% the same applies to codes and statutes.
+
+@restatement{restatetrusts,
+	title={Trusts},
+	no={46},
+	publisher={Am. Law Inst.},
+	year={1959},
+	edition={Second}
+}
+
+@restatement{restatelawlawyer,
+	title={The Law Governing Lawyers},
+	no={2},
+	comment={e},
+	publisher={Am. Law Inst.},
+	year={2000},
+	edition={Third}
+}
+
+% the example data has this abbreviated, but that will only happen if locale strings are used, like \bibstring{Propery}
+@restatement{restateproperty,
+	title={Prop.: Servitudes},
+	no={7.1},
+	publisher={Am. Law Inst.},
+	year={2000},
+	edition={Third}
+}
+
+%% test data for related entries (from Indigo Book 14.2)
+@trialcase{mybibrelated,
+  plaintiffs={Energy and Environment Legal Institute},
+  defendants={Epel},
+  volume={43},
+  reporter={F. Supp.~3d},
+  reporterpage={1171},
+  venue={dco},
+  year={2014},
+  related={tenthrelated},
+  relatedtype={appeal},
+  relatedstring={affirmed}
+}
+
+@appealcase{tenthrelated,
+  plaintiffs={Energy and Environment Legal Institute},
+  defendants={Epel},
+  volume={793},
+  reporter={F.3d},
+  reporterpage={1169},
+  venue={10thcir},
+  related={supremerelated},
+  relatedtype={appeal},
+  relatedstring={certioridenied}
+}
+
+@appealcase{supremerelated,
+  %note the related formatting is customized
+  % so additional information can be included
+  plaintiffs={title={Energy and Environment Legal Institute}},
+  defendants={title={Epel}},
+  volume={136},
+  reporterpage={595},
+  reporter={S. Ct.},
+  year={2015}
+}
+
+%% test data for cases
+@appealcase{casemarbvmad,
+  plaintiffs = {William Marbury},
+  defendants = {James Madison},
+  petitioners = {plaintiffs},
+  respondents = {defendants},
+  year = {1803},
+  reporter = {U.S.}, % actually, the reporter should be just for certain documents in the case, yes?
+  volume = {5},
+  reporterpage = {137},
+  no = {5us137}, % there was no case number, but required for ibid/ibidem testing?
+  venue = {supremecourt}
+}
+
+@externalproceeding{opinionmarbvmad,
+  title={Opinion},
+  crossref={casemarbvmad},
+  argueddate={1803-02-11},
+  decideddate={1803-02-24},
+  url = {https://scholar.google.com/scholar_case?case=9834052745083343188}
+}
+
+@appealcase{brownvboard,
+  plaintiffs = {family={Brown}, suffix={Et Al.}},
+  defendants = {title={Board of Education of Topeka}},
+  petitioners = {plaintiffs},
+  respondents = {defendants},
+  no = {1}, % this is not a typo
+  year={1954},
+  volume=349,
+  reporterpage=294,
+  reporter={U.S.},
+  venue={supremecourt}
+}
+
+@externalproceeding{opinionbrownvboard,
+  title={Opinion},
+  crossref={brownvboard},
+  decideddate={1954-05-17},
+  url = {https://casetext.com/case/brown-v-board-of-education-2}
+}
+
+@appealcase{bellatlanticvtwombly,
+  defendants={title={Bell Atlantic}, suffix={Corporation}},
+  plaintiffs={William Twombly},
+  petitioners={defendants},
+  respondents={plaintiffs},
+  no={05-1126},
+  volume=550,
+  reporterpage=544,
+  reporter={U.S.},
+  year={2007},
+  venue={supremecourt}
+}
+
+@externalproceeding{opiniontwombly,
+  title={Opinion},
+  crossref={bellatlanticvtwombly},
+  argueddate={2006-11-27},
+  decideddate={2007-05-21},
+  url={https://supreme.justia.com/cases/federal/us/550/544/}
+}
+
+%% test data for caselaw (no particular document cited, final opinion and order almost always)
+
+%
+@caselaw{gibbonsvogden,
+  plaintiffs={Thomas Gibbons},
+  defendants={Aaron Ogden},
+  petitioners={plaintiffs},
+  respondents={defendants},
+  year={1824},
+  reporter={U.S.},
+  volume={22},
+  reporterpage={1},
+  crossref={gibbonsvogdentrial}
+}
+
+%% test data for bibstring
+% if field isn't a bibstring but contains one, then using the latex macro \bibstring works, even for complicated name parsing
+
+@caselaw{testbibstring,
+  plaintiffs = {given={\bibstring{supremecourt} 2}, family={\bibstring{firstcircuit} 3}},
+  defendants = {John Doe},
+  reporter = {this :\bibstring{supremecourt}: should be S. Ct.},
+  year = {1031},
+  volume = {1},
+  reporterpage = {3}
+}
+
+@caselaw{testbibstringnoexplicit,
+	plaintiffs = {Not a Bibstring}, % these are easy, since one can "bibstring" the name parts in the name formatting
+	defendants = {Not a bibstring},
+	reporter = {this is supremecourt should be S. Ct.},
+	year = {1031},
+	volume = {1},
+	reporterpage = {3}
+}
+%% test data for supremacy
+@caselaw{alappeals,
+	plaintiffs = {State},
+	defendants = {Jackson},
+        reporter = {Ala.},
+        year={1954},
+	volume={260},
+	reporterpage={698},
+	venue={alappeals}
+}
+@caselaw{alcivilappeals,
+	plaintiffs = {William Herbert Orr},
+	defendants = {Lillian M. Orr},
+        reporter = {So.~2d},
+        year={1979},
+	volume={374},
+	reporter={So.2d},
+	reporterpage={895},
+	venue={alcivilappeals}
+}
+@caselaw{alcriminalappeals,
+	plaintiffs = {State},
+	defendants= {Hall},
+        reporter = {So.~2d},
+        year={1999},
+	volume={820},
+	reporterpage={113},
+	venue={alcriminalappeals}
+}
+@caselaw{alsupreme,
+	plaintiffs = {State},
+	defendants = {Redwine},
+        reporter = {So.~2d},
+        year={1952},
+	volume={61},
+	reporterpage={724},
+	venue={alsupreme}
+}
+%% test data for many names
+
+@caselaw{andersonvjackson,
+	plaintiffs={given={Yolanda}, family={Anderson} and
+		given={Gilda}, family={Burbank} and
+		given={Allen}, family={Harris} and
+		given={Odessia}, family={Lewis} and
+		given={Linda}, family={Degruy} and
+		given={Emelda}, family={May} and
+		given={Hilda}, family={Johnson} and
+		given={Cynthia}, family={Bell} and
+		given={Judith}, family={Watson} and
+		given={Gloria}, family={Williams} and
+		given={Mary}, family={Wright}, prefix={Ann}},
+	defendants={given={Alphonso}, family={Jackson}, title={Secretary, USD HUD} and
+                   "title={United States Department of Housing and Urban Development}" and
+		   given={C.}, prefix={Donald}, family={Babers}, title={Board of Commisssioners, Housing Authority of New Orleans} and
+		   given={William}, prefix={C.}, family={Thorson}, title={Executive Administrator 
+			   Appointing Authority Housing Authority of New Orleans}},
+	volume={556},
+	reporter={F. 3d},
+	reporterpage = {351},
+	venue = {5thcir},
+	year = {2009}
+}
+
+@caselaw{casenamestestborder,
+	plaintiffs={Alice Aardvark and Bob Babe and Charlie Cab},
+	defendants={Delta Dab and Echo Each},
+	volume={1},
+	reporter={A},
+	reporterpage={1},
+	venue={abc},
+	year={1}
+}
+%% test data for constitution
+
+@constitution{constarticle,
+	article={1},
+	sectionno={8}
+}
+@constitution{constamend,
+	amendment={14},
+	sectionno={2}
+}
+
+%% test data for customized inputs
+
+@caselaw{userinputs,
+	casename={My Custom Casename},
+	plaintiffs={A. Aardvark},
+	defendants={B. Baba},
+	shorthand={My custom long citation},
+	shorthandshort={My custom short citation},
+	reporter={U.S.},
+	volume={1},
+	reporterpage={1},
+	year={1900},
+	no={123151251}, % give a unique ID to case number if one doesn't exist 
+	venue={supremecourt}
+}
+
+%% test data for counsels
+@counsel{counsel1,
+  % names can be given an arbitrary number of name parts
+  % and the formatting can be arbitrarily complex
+  % hence individual phone numbers, fax numbers, etc. can be used
+  names = {given=Alice, middle=A., family=Aardvark,prefix=Dr.,title=Director, suffix={J.D.}, contact=alice@acme.com and 
+	   given=Bob, middle=B., family=Babe, prefix=Mr., "suffix={Sr.,J.D.}",title={First Class Plumber},contact=bob@acme.com and
+           title={ACME CORP Suppliers North America}, suffix={LLC}},
+  firm = {ACME CORP Legal},
+  phonenumber = {(111)111-1163},
+  faxnumber = {+1(111)112-1163},
+  onelineaddress = {123 ACME CORP Way, Grand Canyon}
+}
+
+@counsel{counsel2,
+  names = {given=John, family=Fisher, suffix={J.D.}, contact=johnf@gmail.com and 
+	   given=Mark, family=Maker, prefix=Mr., contact=mark@maker.com and},
+  firm = {AAC and Associates},
+  phonenumber = {(111)111-1165},
+  faxnumber = {+1(111)112-1165},
+  onelineaddress = {STE 432, Grand Hilton, Las Vegas}
+}
+
+%% test data for exhibits (pdf, text, and image file types)
+% note, support for URLs for exhibits already uploaded to PACER is available
+% use url field if already known
+@exhibit{image1,
+	filename={random-320-256.png},
+	filedirectory={\suppdir/exhibits},
+	filedescription={Random Noise 320 x 256}
+}
+
+@exhibit{image2,
+	filename={random-640-512.png},
+	filedirectory={\suppdir/exhibits},
+	filedescription={Random Noise 640 x 512}
+}
+
+@exhibit{doc1,
+	filename={sample.pdf},
+	filedirectory={\suppdir/exhibits},
+	filedescription={A sample pdf document}
+}
+
+@exhibit{text1,
+	filename={sample.txt},
+	filedirectory={\suppdir/exhibits},
+	filedescription={A sample text document}
+}
+
+%% memoranda (current cases)
+% this will slow compile time significantly when you have possibly hundreds of citations 
+% to the other legal documents in a single proceeding or pleading
+@proceeding{memo1,
+	title={Motion to Dismiss},
+	shorthand={Mot.~Dism.},
+	documentno={1},
+	url={memo1.pdf}
+}
+@proceeding{memo2,
+	title={Response Opposing Motion to Dismiss},
+	shorthand={Resp.~Opp.\ Mot.~Dism.},
+	documentno={2},
+	url={memo2.pdf}
+}
+@proceeding{memo3,
+	title={Reply Supporting Motion to Dismiss},
+	shorthand={Rep.~Supp.\ Mot.~Dism.},
+	documentno={3},
+	url={memo3.pdf}
+}
