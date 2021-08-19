@@ -1,0 +1,142 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{legbib}[2021/07/21 Legal Biblatex Style]
+\RequirePackage{keyval}
+\RequirePackage{kvoptions}
+%
+\DeclareBoolOption{exhibitinclude}
+\DeclareBoolOption{verboseparties}
+\DeclareBoolOption{bibcaseno}
+%
+\ProcessKeyvalOptions*
+
+% in inserting, use graphicx and pdfpages
+% attachfile for embedded files
+\iflegbib@exhibitinclude
+\RequirePackage{graphicx}
+\RequirePackage{pdfpages}
+%\RequirePackage{attachfile}
+\RequirePackage{verbatim}
+\fi
+
+\RequirePackage{etoolbox}
+\RequirePackage{ifthen}
+\RequirePackage{hyperref}
+
+\RequirePackage[datamodel=legbib,
+bibstyle=legbib,
+citestyle=legbib,
+backend=biber,
+sorting=supremacyyearsort]{biblatex}
+% bibstyle includes the custom locale strings
+
+%% source mapping
+% see MAPLOOP that can be used for iterating source mapping
+\DeclareStyleSourcemap{
+  % for whatever reason, it is common to say petitioner and respondent
+  % but plaintiff-appellant/appellee and defendant-appellant/appellee
+  % someone may want to specify plaintiff, defendant, respondent, and petitioner as separate items
+  % or plaintiff-appellant/appellee and defendant-appellant/appellee as the same ones
+  % this dynamic mapping should allow them to do that
+  %\maps[overwrite=False]{
+  %  \map{
+  %    \step[fieldsource=appellants,fieldtarget=petitioners]
+  %    \step[fieldsource=appellees,fieldtarget=respondents]
+  %    }
+  % % \map{% it can be the case that someone would want to specify respondents=plaintiffs or respondents=defendants
+  % %     % this uses logic to infer what they should be
+  % %     % can't be done here, though if it were important to formatting, the conditionals could be used
+  % } 
+  \maps{
+   \map{
+     \pertype{trialcase}
+     \pertype{appealcase}
+     \pertype{caselaw}
+     \step[fieldsource=plaintiffs,fieldtarget=parties1]
+     \step[fieldsource=defendants,fieldtarget=parties2]
+     \step[fieldsource=caseno,fieldtarget=no]
+   }
+   % it's not consistent what the casenames are, e.g., the Supreme Court reverses them on appeal, but Circuit courts don't
+   % and some state courts like Alabama also reverse on appeal
+   % since you can't implement boolean logic at the data source mapping level, just copy plaintiffs and defendants
+   % currently don't support changing the parties names depending on venue, though that could be implemented using bibmacros 
+   % and enough branching
+   \map{
+     \pertype{statute}
+     \step[fieldsource=sectionno,fieldtarget=no]
+    }
+   \map{
+     \pertype{restatement}
+     \step[fieldsource=sectionno,fieldtarget=no]
+    }
+   \map{
+     \pertype{memorandum}
+     \step[fieldsource=documentno]
+     \step[fieldset=no,origfieldval]
+   }
+   \map[overwrite=False]{
+     \pertype{restatement}
+     \step[fieldset=publisher,fieldvalue={ali}] % ali is defined as a bibstring and field is formatted
+    }
+  % generate sort keys by mapping the venue alias to a number 
+  % (note this would generally be done at a database level, not dynamic modification everytime)
+  \map[overwrite=False]{%don't overwrite an explicitly given sortkey (this is called presort)
+    \pertype{trialcase}
+    \pertype{appealcase}
+    \pertype{caselaw}
+    \step[fieldsource=venue]
+    \step[fieldset=presort, origfieldval]
+    \step[fieldsource={presort}, match={supremecourt}, replace={1}] 
+    \input{supremacy}
+    % note: match replace is partial, so alcriminalappeals _. alcrimin7, since alappeals appears at end
+    % order in which \steps are placed is therefore important for strings containing other strings as substrings
+  }
+  \map[overwrite=False]{}
+  }
+}
+%% bibliography filters by entry types/categories
+% note to be transparent to biber and analytics, these catgories are better defined as fields by Sourcemapping on the entry type
+\defbibfilter{law}{type=code or type=statute}
+\defbibfilter{cases}{type=trialcase or type=appealcase or type=caselaw or type=motion or type=opinion}
+\defbibfilter{otherauthorities}{type=restatement or type=article}
+
+%% special fields
+% used not only in citation and entry formatting, but also in, e.g., idem tracking
+\DeclareLabelname{
+  \field{names}}
+
+\DeclareLabeldate{
+  \field{date}
+  \field{filingdate}
+  \field{argueddate}
+  \field{decideddate}}
+
+\DeclareLabeltitle{
+  \field{no}}
+
+%% declare data inheritance rules (not done in data model file)
+% default is all fields copied (names and values)
+%\DefaultInheritance{all=true} % default behavior
+
+%\DeclareDataInheritance{parententrytype}{childentrytype}{
+%\inherit{fieldsource}{fieldtarget}
+%\inherit{fieldsource}{fieldtarget}
+%}
+
+%% sorting template
+%field which are occuring later are sorted within the sort of earlier fields
+\DeclareSortingTemplate{supremacyyearsort}%
+{
+\sort{\field{presort}} 
+\sort[direction=descending]{\field{year}}
+\sort{\field{parties1}
+     \field{parties2}
+     \field{no}}
+}
+% TODO: in addition to court supremacy, one may sort by number of citations made to reference
+% the citecounter is available as a package option
+% see TeX SE: 362294
+
+\DeclareSortingTemplate{alphabeticalsort}%
+{\sort{\field{parties1}}
+\sort{\field{note}}
+}

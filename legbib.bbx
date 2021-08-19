@@ -1,0 +1,602 @@
+% bibliography style
+\ProvidesFile{cases.bbx}
+\RequireBibliographyStyle{standard}
+\ExecuteBibliographyOptions{hyperref, related, 
+pagetracker, backref, 
+citecounter, citetracker, 
+ibidtracker, idemtracker,
+mincrossrefs=1, autocite=inline,
+backrefstyle=three+, maxnames=5 % maxnames needs to be effectively shutoff
+}
+% from manual:
+% If you want to override maxnames and minnames and force printing of the entire
+% list, you may refer to the listtotal counter in the second optional argument:
+% \printnames[...][-\value{listtotal}]{...}
+\ExecuteBibliographyOptions[exhibit]{labelnumber} % only some options are on a per-type basis
+
+%% lbx language mapping
+% see table 2 of manual for a list of all languages
+\DeclareLanguageMapping{english}{english-legbib} % lbx file extension
+\DeclareLanguageMapping{american}{english-legbib}
+\DeclareLanguageMapping{USenglish}{english-legbib}
+
+%% Field Formatting
+
+% convert field value aliases using locale bibstrings
+% the default fieldformat for any field is the same as its name
+% a lot of the \iffieldundef conditionals can be avoided by judicious use of field formats, which can be per-type
+
+% bibstring applied to space separated values
+% solution due to Martin Scharrer, TeX SE 11595
+% note generally this is discouraged because for database entries it's better to have a unique single key
+
+\def\bibstringed#1{%
+    \@bibstringed#1 \@empty%
+}
+\def\@bibstringed#1 #2{%
+   \ifbibstring{#1}{\bibstring{#1}}{#1}\space%
+   \ifx #2\@empty\else%
+    \expandafter\@bibstringed%
+   \fi%
+   #2%
+}
+%
+% convert string (though petitioners and respondents are not used anyway since casenames in most conventions retaining the names of plaintiffs/defendants)
+\DeclareFieldFormat{petitioners}{\iffieldequalstr{petitioners}{defendants}%
+{\thefield{defendants}}
+{\iffieldequalstr{petitioners}{plaintiffs}%
+  {\thefield{plaintiffs}}{\thefield{petitioners}}
+}
+}
+\DeclareFieldFormat{respondents}{\iffieldequalstr{respondents}{defendants}%
+{\thefield{defendants}}
+{\iffieldequalstr{respondents}{plaintiffs}%
+  {\thefield{plaintiffs}}{\thefield{respondents}}
+}
+}
+%
+\DeclareFieldFormat{venue}{\ifbibstring{#1}{\bibstring{#1}}{#1}}
+\DeclareFieldFormat{reporter}{\bibstringed{#1}}
+\DeclareFieldFormat{publisher}{\ifbibstring{#1}{\bibstring{#1}}{#1}}
+\DeclareFieldFormat{explanatoryparanthetical}{\mkbibparens}
+
+\DeclareFieldFormat{legalital}{\mkbibemph{#1}}
+
+% some fields have formatting directives by default, clear them
+\DeclareFieldFormat{title}{\thefield{title}} % don't italicize
+\DeclareFieldFormat{volume}{\thefield{volume}} % don't preface with bibstring for volume
+\DeclareFieldFormat{pages}{\thefield{pages}} % don't preface with bibstring for pages
+
+% name field formatting (note this isn't just the name, but also the list formatting part of the name)
+
+% counsel (add however much branching is required for formatting) 
+% access length of list with liststop
+\DeclareNameFormat[counsel]{names}{%
+\ifthenelse{\value{listcount}=1}%
+  {\relax}%first name
+  {\ifthenelse{\value{listcount}<\value{liststop}}%
+    {\printtext{\newline}}% intermediate name
+    {\printtext{\newline}}% last name
+  }%
+% its a person if it has a family name, otherwise not
+% not very sophisticated since counsel should consiste of only names
+\ifdefvoid{\namepartgiven}{\nameparttitle\ifdefvoid{\namepartsuffix}{\relax}{\addcomma\addspace\namepartsuffix}}
+{%
+\namepartprefix%first person
+\ifdefvoid{\namepartprefix}{\relax}{\addspace}% can't field format individual name parts
+\namepartgiven%
+\ifdefvoid{\namepartgiven}{\relax}{\addspace}% can't field format individual name parts
+\namepartmiddle% this is initial form of second 
+\ifdefvoid{\namepartmiddle}{\relax}{\addspace}% can't field format individual name parts
+\namepartfamily%
+\ifdefvoid{\namepartfamily}{\relax}{\addspace}% can't field format individual name parts
+\namepartsuffix%
+\ifdefvoid{\nameparttitle}{\relax}{\addcomma\addspace\nameparttitle}%
+\ifdefvoid{\namepartcontact}{\relax}{\printtext{\newline}\namepartcontact}%
+%use ifdefvoid, not iffieldundef, since these are not datafields but derived from a datamodel constant
+}}
+
+% note parties may be individuals or organizations 
+% the liststop value is specified not in the format but in the argument to \printnames
+\DeclareNameFormat{partylong}{%
+\ifdefvoid{\namepartfamily}%
+{%organization
+\printtext[legalital]{\nameparttitle\addspace\namepartsuffix}%
+}%
+{%individual
+\printtext[legalital]{\namepartgiven\addspace\namepartfamily}%
+}%
+\ifnumless{\value{listcount}}{\value{liststop}}%
+  {\addcomma\addspace}%
+  {\ifnumequal{\value{listcount}}{\value{listtotal}}%
+    {\relax}%
+    {\addspace\emph{\bibstring{etal}}}%
+  }%
+}
+
+\DeclareNameFormat{partyshort}{%
+\ifdefvoid{\namepartfamily}%
+  {%organization
+  \printtext[legalital]{\nameparttitle}%
+  }%
+  {%individual
+  \printtext[legalital]{\namepartfamily}%
+  }%
+}
+
+% while inefficient to check a package option at every
+% I couldn't bibmacro define within an ifthen
+
+\ifthenelse{\boolean{legbib@verboseparties}}
+{
+\newbibmacro*{parties}{%
+  \printnames[partylong][1-3]{parties1}
+  \setunit{\addspace}%
+  \midsentence*\mkbibitalic{\bibstring{versus}}%
+  \setunit{\addspace}%
+  \printnames[partylong][1-3]{parties2}
+}%
+}
+{
+\newbibmacro*{parties}{%
+  \printnames[partyshort][1-1]{parties1}
+  \setunit{\addspace}%
+  \midsentence*\mkbibitalic{\bibstring{versus}}%
+  \setunit{\addspace}%
+  \printnames[partyshort][1-1]{parties2}
+}%
+}
+
+%% bibliography (entry) macros 
+%% these format arbitrary combinations of the fields
+% convention used here is that there is only one bibliography macro used in the bibliography driver 
+% that is specific to that entry type, with the name of the entry type
+% nested macros are used in that one macro
+% for nested macros, they may print several fields and have varying punctuation.
+% however, all punctuation (unit setting) should be limited to fields other than after the last one or before the first one
+
+% c.f. GENERIC BIBLIOGRAPHY MACROS of biblatex.def
+% some conventions, such as % symbols (which are necessary to prevent whitespace from being formatted), are taken
+% but I use trailing or single line brace delimiters
+
+\newbibmacro*{reporter}{%
+  \printfield{volume}%
+  \setunit{\addspace}% only add space in case volume is nonempty
+  \printfield{reporter}% reporter must always be non-empty
+  \midsentence*% this will change to punctuation dot
+  \setunit{\addspace}
+  \printfield{reporterpage}
+}
+
+\newbibmacro*{databasereporter}{%
+  \printfield{year}%
+  \setunit{\addspace}%
+  \printfield{databasereporter}%
+  \setunit{\addspace}%
+  \iffieldundef{databaseid}%
+  {\printtext{No I.D.}}%
+  {\printfield{databaseid}}%
+}
+
+% make a clickable hyperlink
+\newbibmacro*{urldatabasereporter}{%
+  \iffieldundef{url}%
+    {\usebibmacro{databasereporter}}%
+    {\href{\thefield{url}}{\usebibmacro{databasereporter}}}%
+}
+
+\newbibmacro*{urlreporter}{%
+  \iffieldundef{url}%
+    {\usebibmacro{reporter}}%
+    {\href{\thefield{url}}{\usebibmacro{reporter}}}%
+}
+
+\newbibmacro*{explanatoryparanthetical}{%
+  \printfield{explanatoryparanthetical}%
+}
+
+\newbibmacro*{venue+year}{%
+  \printfield{venue}%
+  \setunit{\addspace}%
+  \iffieldundef{year}%
+    {\relax}%
+    {\iffieldundef{reporter}%
+      {\relax}%
+      {\printtext[parens]{\printfield{year}}}%
+    }%
+}
+
+\ExplSyntaxOn
+\newbibmacro*{allpincites}{%
+\edef\temp{abx@\thefield{entrykey}@postnotes}%
+\ifcsvoid{\temp}{}{%
+\renewcommand\do[1]{\advance\count35 by1}
+\dolistcsloop{\temp}%
+\ifnum\count35>1
+  \printtext{\bibstring{pages}\setunit{\addspace}}%
+\else
+  \printtext{\bibstring{page}\setunit{\addspace}}%
+\fi
+% unsorted
+%\renewcommand\do[1]{\printtext{##1}\setunit{\addcomma\addspace}}% nested in another macro definition 
+%\dolistcsloop{\temp}%
+% note pdfstrcmp doesn't parse numbers, so 2 > 19, and it isn't trivial when there is mixed data types to do alphanumeric sorting
+% effectively, you need to parse and then do numexpr (alternatively you could remove all characters of ., (, ) and do a "26-igit" sort, which will work even for non-positional roman numeral notation at least until iii, since at iv there is a problem)
+% ultimately if regexp isn't used, the user should input something like paragraph.1.0.0(a) or subparagraph.1.1.3(a)(ii)
+\seq_new:N \l_foo_seq
+\renewcommand\do[1]{\seq_put_right:Nn \l_foo_seq {##1}}
+\dolistcsloop{\temp}
+\let\Ptemp=\P
+\let\Stemp=\S
+\edef\P{}
+\edef\S{}
+\seq_sort:Nn \l_foo_seq
+{ \int_compare:nTF {\pdfstrcmp{##1}{##2}>0} { \sort_return_swapped: } { \sort_return_same: } }
+\let\P=\Ptemp
+\let\S=\Stemp
+\seq_use:Nnnn \l_foo_seq { ~ and ~ } {, ~ } {, ~ and ~}
+}}
+\ExplSyntaxOff
+
+\newbibmacro*{pincites}{%
+  \iffieldundef{pincites}
+    {\usebibmacro{allpincites}}
+    {\printfield{pincites}}%
+}
+
+\newbibmacro*{starpincites}{%
+  \setunit{\addspace*}%
+  \usebibmacro{pincites}%
+}
+
+\newbibmacro*{generalreporter}{
+  \iffieldundef{reporter}%
+    {\usebibmacro{urldatabasereporter}%
+     \setunit{\addcomma\addspace}%
+     \usebibmacro{starpincites}%
+    }%
+    {\usebibmacro{urlreporter}%
+     \setunit{\addcomma\addspace}%
+     \usebibmacro{pincites}%
+     }%
+}
+
+% branches are put in where trial and appeal cases differ
+\newbibmacro*{casename}{%
+\iffieldundef{casename}%
+  {\usebibmacro{parties}}%
+  {\printfield{casename}}%
+}
+
+\ifthenelse{\boolean{legbib@bibcaseno}}{
+\newbibmacro*{caseno}{%
+  \ifentrytype{trialcase}%
+    {\printtext{Case \bibstring{number}:}}%
+    {\printtext{\bibstring{number}:}}%
+  \setunit{\addspace}%
+  \printfield{no}%
+}
+}{\newbibmacro*{caseno}{}}
+
+\newbibmacro*{americanargueddate}{%
+  \printfield{arguedmonth}/\printfield{arguedday}/\printfield{arguedyear}}
+
+\newbibmacro*{americandecideddate}{%
+  \printfield{decidedmonth}/\printfield{decidedday}/\printfield{decidedyear}}
+
+% document reference to opinion or other documents in another case 
+% is different from citing the current case's legal memoranda
+% but they are formatted the same because other cases are supposed to be inheriting 
+\newbibmacro*{documenttitle}{%
+\iffieldundef{title}%
+  {\MakeCapital{\printfield{entrytype}}}%
+  {\printfield{title}}%
+}
+\newbibmacro*{documentshorthand}{%
+\iffieldundef{shorthand}%
+  {\relax}%
+  {\printfield[parens]{shorthand}}%
+}
+\newbibmacro*{documentno}{%
+\iffieldundef{documentno}%
+  {\addcolon\addspace%
+  \href{\thefield{url}}{link}}%
+  {\setunit{\addperiod\addspace}%
+  \printtext{\bibstring{document} \bibstring{number}:}%
+  \setunit{\addspace}%
+  \href{\thefield{url}}{\printfield{documentno}}%
+  }%
+}
+\newbibmacro*{documentdates}{%
+\iffieldundef{arguedday}%
+  {\relax}%
+  {\printtext{\bibstring{argued}: }%
+   \usebibmacro{americanargueddate}}%
+\setunit{\addperiod\addspace}%
+\iffieldundef{decidedday}%
+  {\relax}%
+  {\printtext{\bibstring{decided}: }%
+  \usebibmacro{americandecideddate}}%
+\setunit{\addperiod\addspace}%
+}
+
+%% macros for statutues
+\newbibmacro*{publisher+year}{%leaves conspicious empty paranethetical if year is not provided (on purpose)
+  \printtext[parens]{\printfield{publisher}%
+  \setunit*{\addspace}%
+  \printfield{year}}%
+}
+
+\newbibmacro*{statute}{%
+  \printfield{name}%
+  \setunit{\addcomma\addspace}%
+  \printfield{title}%
+  \setunit{\addspace}%
+  \printfield{code}%
+  \setunit{\addspace}%
+  \printtext{\S}%
+  \setunit{\addspace}%
+  \printfield{no}%
+  \setunit{\addspace}%
+  \usebibmacro{publisher+year}%
+}
+
+\newbibmacro*{restatement}{%
+  \printtext{Restatement}%
+  \setunit{\addspace}%
+  \iffieldundef{edition}%
+    {\relax}%
+    {\printtext[parens]{\printfield{edition}}}% if first edition, and there are no other editions, then this is omitted
+  \setunit{\addspace}%
+  \printtext{\bibstring{of}}%
+  \setunit{\addspace}%
+  \printfield{title}%
+  \setunit{\addspace}%
+  \printtext{\S}%
+  \setunit{\addspace}% necessary?
+  \printfield{no}%
+  \setunit{\addspace}%
+  \iffieldundef{comment}%
+    {\relax}%
+    {\printtext{\bibstring{comment}}%
+    \setunit{\addspace}%
+    \printfield{comment}}%
+  \setunit{\addspace}%
+  \usebibmacro{publisher+year}%
+}
+
+\newbibmacro{constitution}{%
+  \printtext{\bibstring{unitedstates} \bibstring{constitution}}%
+  \addspace%
+  \iffieldundef{article}%
+    {\printtext{\bibstring{amendment}}%
+    \addspace%
+    \RN{\thefield{amendment}}}%
+    {\printtext{\bibstring{article}}%
+    \addspace%
+    \RN{\thefield{article}}}%
+  \setunit{\addperiod\addspace}%
+  \iffieldundef{sectionno}%
+    {\relax}%
+    {\S \printfield{sectionno}}%
+}
+
+
+%% macros for exhibits
+
+% a note about exhibits: generally a freeware solution is desired, but that requires ghostscript library for turning arbitrary filetypes to pdf, then some kind of way of inserting exhibit numbering based on the file name and page numbering in the exhibit
+% I used PDFStudio to achieve these things
+
+% since the bibliography formatting occurs inside a "bib environment", the pages will not generally be occupying the entire page.
+% see \defbibenvironment in biblatex.sty
+
+\newbibmacro*{exhibitincludelabel}{
+  {\Huge Exhibit \printfield{labelnumber}:}
+  \printtext{\newline}%
+  \iffieldundef{url}%
+    {\href{\thefield{filename}}{\printfield{filedescription}}}
+    {\href{\thefield{url}}{\printfield{filedescription}}}
+}
+
+\newbibmacro*{exhibitimageinclude}{
+  \printtext{\newline}%
+  \includegraphics[width=.8\textwidth]%
+    {\thefield{filedirectory}/\thefield{filename}}
+  }
+  \newbibmacro*{exhibitdocumentinclude}{
+  \printtext{\newline}%
+  \includepdf[pages=-,width=.95\textwidth]%
+    {\thefield{filedirectory}/\thefield{filename}}
+  }
+  \newbibmacro*{exhibittextinclude}{
+  \printtext{\newline}%
+  \verbatiminput{\thefield{filedirectory}/\thefield{filename}}
+}
+
+\newbibmacro*{exhibitinclude}{
+% only include a file if its locally hosted (url is undefined)
+\iffieldundef{url}{
+\usebibmacro{exhibitincludelabel}
+\newunit\newblock
+% simply maps file types to appropriate input macros.  one can use TeX case
+% switching based on integers and can define integer values for file extensions
+% control sequences and then use \csname \endcsname.
+\edef\fname{\thefield{filename}}
+\filename@parse{\fname} 
+\ifthenelse{\equal{\filename@ext}{pdf}}
+  {\usebibmacro{exhibitdocumentinclude}}
+  {\ifthenelse{\equal{\filename@ext}{txt}}
+    {\usebibmacro{exhibittextinclude}}
+    {\usebibmacro{exhibitimageinclude}}
+  }
+}
+{\usebibmacro*{exhibitlink}}
+}
+
+\newbibmacro*{exhibitlog}{
+\immediate\write\z@{\string\exhibit%
+{\thefield{labelnumber}}%
+{\thefield{filename}}%
+{\thefield{filedirectory}}%
+{\thefield{filedescription}}}%
+}
+
+% file attachment in the pdf is not allowed
+% even when hyperlinking to arbitrary resources is allowed
+% because of code injection/local device access
+
+\newbibmacro*{exhibitattachlabel}{
+\mkbibbrackets{\printfield{labelnumber}}~
+\printfield{filedescription}\addperiod\addspace
+}
+\newbibmacro*{genericattach}{
+\attachfile[author={bibLaTeX: Exhibit \thefield{labelnumber}},
+color={0 0 0},
+description=\thefield{filedescription},
+subject=\thefield{filesubject}]
+{\thefield{filedirectory}/\thefield{filename}}
+}
+\newbibmacro*{exhibitattach}{
+\usebibmacro{exhibitattachlabel}
+\usebibmacro{genericattach}
+}
+
+\newbibmacro*{exhibitlink}{
+\mkbibbrackets{\printfield{labelnumber}}~%
+\iffieldundef{url}%
+{\href{\thefield{filename}}{\printfield{filedescription}}}
+{\href{\thefield{url}}{\printfield{filedescription}}}
+}
+
+\DeclareFieldFormat{phonenumber}{\printtext{Phone: }\thefield{phonenumber}}
+\DeclareFieldFormat{faxnumber}{\printtext{Facsimile: }\thefield{faxnumber}}
+\DeclareFieldFormat{email}{\printtext{E-mail: }\thefield{emailaddress}}
+
+\newbibmacro*{counsel}{%
+\printnames{names}%
+\setunit{\newline}%
+\printfield{onelineaddress}%
+\setunit{\newline}%
+\printfield{credentials}%
+\setunit{\newline}%
+\printfield{firm}%
+\setunit{\newline}%
+\printfield{phonenumber}%
+\setunit{\newline}%
+\printfield{faxnumber}%
+\setunit{\newline}%
+\printfield{email}%
+}
+
+%% bibliography drivers (sequence macros which will expand to create entries)
+% bibliography driver is for entry type defined 
+% in custom data model
+% note that "bibindex" is here irrelevant since the index fields or counters are not provided
+% in legal citations a large part of the bibliography entry is provided in-line
+
+%% related entries
+% you need to define a bibmacro, but that bib macro can use a driver which is
+% generally considered "higher level".  see biblatex.def and standard.bbx,
+% section 3.4 of the manual 
+\renewbibmacro*{related:default}[1]
+{\entrydata*{#1}{%
+\usedriver{\renewbibmacro*{parties}{\relax}}{\thefield{entrytype}}%
+% note on some appeal cases, the named parties change
+% so more complicated logic can be used then omitting the parties names
+}
+}
+\newbibmacro*{related:appeal}[1]{\usebibmacro{related:default}{#1}}
+
+% this is supposed to format particular strings used in related entries
+\DeclareFieldFormat{relatedstring:default}{\mkbibemph{\ifbibstring{#1}{\bibstring{#1}}{#1}}}
+
+\DeclareBibliographyDriver{trialcase}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{casename}%
+  \newunit\newblock%
+  \usebibmacro{generalreporter}%
+  \newunit\newblock%
+  \usebibmacro{caseno}
+  \newunit\newblock%
+  \usebibmacro{venue+year}%
+  \newunit\newblock%
+  \usebibmacro{explanatoryparanthetical}%
+  \newunit\newblock%
+  \usebibmacro{setpageref}% for back references (defined in biblatex.def)
+  \newunit\newblock%
+  \usebibmacro{related:init}% copied from standard.bbx
+  \usebibmacro{related}%
+  \usebibmacro{finentry}%
+}
+
+\DeclareBibliographyAlias{appealcase}{trialcase} 
+
+\DeclareBibliographyAlias{caselaw}{trialcase}
+% this is a soft alias and fail at related entries?
+
+\DeclareBibliographyDriver{proceeding}{
+  \usebibmacro{bibindex} 
+  \usebibmacro{begentry}
+  \usebibmacro{documenttitle}
+  \newunit\newblock
+  \usebibmacro{documentshorthand}
+  \newunit\newblock
+  \usebibmacro{documentno}
+  \newunit\newblock
+  \usebibmacro{documentdates}
+  \newunit\newblock
+  \usebibmacro{allpincites}
+  \newunit\newblock
+  \usebibmacro{setpageref}
+  \usebibmacro{finentry}
+}
+
+\DeclareBibliographyAlias{externalproceeding}{proceeding}
+% should be placed below a case, if properly cited
+
+\DeclareBibliographyDriver{counsel}{
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{counsel}%
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{statute}{
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{statute}%
+  \newunit\newblock%
+  \usebibmacro{setpageref}% for back references (defined in biblatex.def)
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{constitution}{
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{constitution}%
+  \newunit\newblock%
+  \usebibmacro{setpageref}% for back references (defined in biblatex.def)
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{restatement}{
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{restatement}%
+  \newunit\newblock%
+  \usebibmacro{setpageref}% for back references (defined in biblatex.def)
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{exhibit}{
+\usebibmacro{bibindex}
+\usebibmacro{begentry}
+\iflegbib@exhibitinclude
+\usebibmacro{exhibitinclude}% not yet optimized 
+\else
+\usebibmacro{exhibitlink}
+%\usebibmacro{exhibitattach}% almost never used because of document security
+\fi
+\usebibmacro{exhibitlog}
+\usebibmacro{finentry}
+}
+
+%% bibliography headings
+\defbibheading{noheading}[\bibname]{\relax} % note there is already a "none" defined by the style

@@ -1,0 +1,247 @@
+\ProvidesFile{authortitle.cbx}
+[\abx@cbxid]
+
+% customize after bibliography options are executed
+
+%% Declare field formatting directives
+% these are done in the bbx file
+
+%% declare citation
+
+\newbibmacro*{cite:shorthand}{\printtext[bibhyperref]{\printfield{shorthand}}}
+\newbibmacro*{cite:shorthandshort}{\printtext[bibhyperref]{\printfield{shorthandshort}}}
+
+% R15.1.2. For subsequent cites in text, refer to one party’s name (or an unambiguous reference to the case name), 
+% as well as a short form citation in the form of <volume> <Name of Reporter> at <pincite>
+% R15.2.2. (text cites in B. Cases)
+% For cases, a short form citation usually includes: <The First Party of the Case Name>, <volume number> <Reporter> at <pincite>. 
+\newbibmacro*{cite:short}{
+  \printnames[partyshort][1-1]{parties1}%
+  \setunit{\addcomma\addspace}%
+  \iffieldundef{volume}%
+    {\printfield{databaseid}}%
+    {\printfield{volume}}%
+  \setunit{\addcomma\addspace}%
+  \iffieldundef{reporter}%
+    {\printfield{databasereporter}}%
+    {\printfield{reporter}}%
+  \setunit{\addspace}%
+  \iffieldundef{pinpages}%
+    {\relax}%
+    {\printtext{\bibstring{at}}%
+    \setunit{\addspace}%
+    \printfield{pinpages}%
+    }%
+}
+
+% R11.1. Elements of a full citation. When providing a full citation to a case, you should generally include the following:
+%
+%    case name;
+%    volume number, reporter, first page;
+%    pincite (the exact page number you are referring to, if necessary);
+%    court, year (see special instructions below for pending and unreported cases);
+%    explanatory parenthetical (if necessary);
+%    prior or subsequent history of the case (if any).
+
+\newbibmacro*{cite:long}{%
+  \printnames[partyshort][1-1]{parties1}%
+  \setunit{\addspace}%
+  \midsentence*% stops automatic capitalization v. -> V.
+  \mkbibitalic{\bibstring{versus}}%
+  \setunit{\addspace}%
+  \printnames[partyshort][1-1]{parties2}%
+  \setunit{\addcomma\addspace}%
+  \usebibmacro{generalreporter}%
+  \setunit{\addspace}%
+  \printfield{venue}%
+  \setunit{\addspace}%
+  \printtext[parens]{\printfield{year}}%
+}
+
+% R12.4.1 Citations to these electronic databases should be formatted as follows: 
+% <Case Name>, <case docket number>, <database identifier and electronic report number>, at *<star page number> <(court, full date)>.
+
+% only problem with this is the person must know if what they are citing is electronic or not, if the page number is supplied at cite time
+% however the citation command postnote may be able to check formatting
+
+% note: you may be able to set the values on some of the \cbx@lasthash or other internal trackers 
+% to avoid using custom macros for savefield
+% and renew the \ifciteidem command
+\newcommand{\cbx@idemidentifier}{}
+
+\newbibmacro*{savepostnote}{%
+\edef\temp{abx@\thefield{entrykey}@postnotes}%
+\ifciteseen{}{\csxdef{\temp}{}}%
+\iffieldundef{postnote}{}{\listcsxadd{\temp}{\csfield{postnote}}}%
+}
+% without a DeclareCitationDriver analogue to the DeclareBibliographyDriver
+% use DeclareBibliographyDriver
+% see 4.11.6 Mixing Programming Interfaces from the manual
+
+% TODO: ibid/ibidem should be general citation, so this logic should not be only for cases but external
+% also even if there is a shorthand, one should use ibid/idem first
+
+% since court cases are not authored, other than ibid, what is needed?
+% the only thing is you may want some abbreviation for "in the same case", which could use idem
+% to refer to different motions and pleadings
+% that requires using the case number in analogy to an author name
+
+% NOTE: \if... commands generally have some number of arguments in their parameter text
+% but happen to expand the first or second of the groups that come after them 
+% however, you can put them compounded inside \ifthenelse without these groups (the way ifthenelse parses prevents their expansion?)
+\DeclareBibliographyDriver{cite:trialcase}{%
+\ifthenelse{\iffieldequals{no}{\cbx@idemidentifier}\AND\NOT\iffirstonpage}%
+   {\ifciteibid% anything which is ibid is also idem
+     {\usebibmacro{cite:ibid}}%
+     {\usebibmacro{cite:idem}}%
+   }%
+   {\ifciteseen%
+     {\iffieldundef{shorthandshort}%
+       {\bibhyperref{\usebibmacro{cite:short}}}%
+       {\usebibmacro{cite:shorthandshort}}%
+     }%
+     {\iffieldundef{shorthand}%
+       {\bibhyperref{\usebibmacro{cite:long}}}%
+       {\usebibmacro{cite:shorthand}}%
+     }%
+   }%
+\savefield{no}{\cbx@idemidentifier}%
+}
+
+\DeclareBibliographyAlias{cite:appealcase}{cite:trialcase}
+\DeclareBibliographyAlias{cite:caselaw}{cite:trialcase}
+
+% TODO: add to this citation also the document number
+\DeclareBibliographyAlias{cite:externalproceeding}{cite:trialcase}
+
+% don't use ibid/ibidem for within-case references
+\DeclareFieldFormat{shorthandovertitle}{\iffieldundef{\currentfield}{\thefield{title}}{\thefield{shorthand}}}
+\DeclareBibliographyDriver{cite:proceeding}{%
+\ifthenelse{\ifciteseen\OR\iffieldundef{documentno}}%
+{%
+\iffieldundef{url}%
+  {\printfield[shorthandovertitle]{shorthand}\isdot}%
+  {\href{\thefield{url}}{\printfield[shorthandovertitle]{shorthand}\isdot}}%
+}%
+{%
+\iffieldundef{url}%
+  {\printfield[shorthandovertitle]{shorthand}\isdot\addcomma\addspace\printtext{\bibstring{document}}\addspace\printfield{documentno}}%
+  {\href{\thefield{url}}{\printfield[shorthandovertitle]{shorthand}\isdot}\addcomma\addspace\printtext{\bibstring{document}}\addspace\printfield{documentno}}%
+}%
+\midsentence%
+}
+% R18.2. Restatements
+% 
+%   R18.2.1. Cite Restatements by indicating the title of the particular Restatement cited, followed by the number of the section containing the material you are referencing, followed by the name of the publisher and the year published in parentheses.
+%     Do not use a comma in between title and section number, or between the section number and the year parenthetical.
+%     You may in addition refer to a comment by its letter designation if the material you are citing is contained in a comment.
+%     Comments are abbreviated “cmt.”
+% 
+%   Examples:
+%     Restatement (Second) of Trusts § 46 (Am. Law Inst. 1959).
+%     Restatement (Third) of The Law Governing Lawyers § 2 cmt. e (Am. Law Inst. 2000).
+%     Restatement (Third) of Prop.: Servitudes § 7.1 (Am. Law Inst. 2000).
+
+% I ended up using the CITE THUS guideline on the first pages of the restatement
+
+\DeclareBibliographyDriver{cite:restatement}{%
+\bibhyperref{\printtext{Restatement}%
+\setunit{\addspace}%
+\printfield{title}%
+\setunit{\addcomma\addspace}%
+\printfield{edition}%
+\setunit{\addcomma\addspace}%
+\printtext{\S}%
+\printfield{no}}%
+}
+
+% R16.1.2 U.S. Code: For citations to the U.S. Code (the preferred citation): 
+% <Name of Statute [optional]>, <title> U.S.C. § <section number> <(year published)>. 
+
+% R16.1.3. U.S. Code Annotated: If the U.S.C. cite is not available, then cite to the U.S. Code Annotated. 
+% The citation form is <Name of Statute>, <title> U.S.C.A. § <section number> <(<Name of Publisher> <year published>)>. 
+
+% R16.1.4. Pinpoint citations: To cite to an individual provision within a statute, use the following form: 
+% <Name of Statute> <original section number>, <title> <Abbreviation for Name of Statutory Code> § <section number> <(<Name of Publisher, but only if citing unofficial code> <year published>)> 
+
+% R16.1.5. Official Session Laws: If neither a U.S. Code or U.S. Code Annotated citation is available, then cite to official session laws, using the following forms:
+%   Cite without pinpoint: <Name of Statute,> Pub. L. No. <____>, <volume> Stat. <page number> <(year passed)>.
+%   Cite with pinpoint: <Name of Statute,> Pub. L. No. <____>, <original section number>, <volume> Stat. <page number>, <page pinpoint> <(year passed)>.
+
+% R18.3. Uniform Commercial Code: Cites to the Uniform Commercial code take the following form: 
+% U.C.C. § <section number> (<publisher> <year published>).
+%   Example: U.C.C § 9-105 (Unif. Law Comm’n 2010).
+%
+% R18.4. Uniform Laws Annotated: Citations to the Uniform Laws Annotated take the following form: 
+% <Title of Act> § <section number>, <volume> U.L.A. <page> <(year published)>. 
+
+% R19.1. Citations to “administrative” rules and regulations—that is, those promulgated by an administrative agency (e.g., the Environmental Protection Agency or the Food and Drug Administration)—take the following form: 
+% <title number of CFR provision> C.F.R. § <section number> <(year published)>.
+
+% R19.2. If the regulation is generally referred to by name or listing the name and/or the name of the agency issuing the regulation would otherwise improve clarity, include it at the beginning of the citation. Citations to administrative rules and regulations that include the regulation name take the following form: 
+% <Name of the Regulation and/or Name of the Agency Promulgating the Regulation>, <title no. of CFR provision> C.F.R. § <section number> <(year published)>.
+
+% R20.1. Internal Revenue Code: Citations to the Internal Revenue Code take either of two forms:
+%   R20.1.1. Citations to the code itself take the following form: I.R.C. § <section number> <(year published)>.
+%   R20.1.2. Citations to Title 26 of the U.S. Code, which is where the Internal Revenue Code is codified, take the following form: 
+%   26 U.S.C. § <section number> <(year published)>.
+
+\DeclareBibliographyDriver{cite:statute}{%
+\printfield{title}%
+\setunit{\addspace}%
+\printfield{code}%
+\setunit{\addspace}%
+\printtext{\S}%
+\setunit{\addspace}%
+\printfield{no}%
+}
+
+\DeclareBibliographyDriver{cite:exhibit}{%
+\bibhyperref{\printfield{labelnumber}}%
+}
+
+% R23.1. Citations to the U.S. Constitution follow a simple form, elaborated below:
+
+%   <U.S. Const.> <cited section of constitution, abbreviated> <number of article or amendment in Roman numeral form> 
+%   <§ and pinpoint, if applicable> <(additional information, if needed)>.
+
+\DeclareBibliographyDriver{cite:constitution}{\usebibmacro{constitution}}
+
+% R21.1. If unenacted, cite as follows: 
+% <name of bill, if helpful>, <abbreviation from the list below> <bill number>, <number of the Congress> <section, if not citing the entire bill> <year of publication>, 
+
+% TODO \DeclareBibliographyDriver{cite:legislation} % legislation is unenacted code
+
+% ibid/idem/supra
+
+\providecommand*{\mkibid}[1]{#1} 
+
+\newbibmacro*{cite:ibid}{%
+  \printtext[bibhyperref]{\bibstring[\mkibid]{ibidem}}}
+
+% one may want to contrast supra with other shorthands (this is style manual dependent)
+\newbibmacro*{cite:idem}{%
+  \printtext[bibhyperref]{\bibstring[\mkibid]{idem}}%
+  \addcomma%
+  \printtext{\bibstring{document}:}%
+  \addspace%
+  \printfield{documentno}%
+}
+
+\DeclareCiteCommand{\cite}
+  {\usebibmacro{prenote}} % precode
+  {\usedriver{}{cite:\thefield{entrytype}}} % loop code
+  {\multicitedelim} % sepcode 
+  {\usebibmacro{postnote}\usebibmacro{savepostnote}}%
+\DeclareCiteCommand{\parencite}
+  {\usebibmacro{prenote}} % precode
+  {(\usedriver{}{cite:\thefield{entrytype}})} % loop code
+  {\multicitedelim} % sepcode 
+  {\usebibmacro{postnote}\usebibmacro{savepostnote}}%postcode
+\DeclareCiteCommand{\textcite}
+  {\usebibmacro{prenote}} % precode
+  {\usedriver{}{cite:\thefield{entrytype}}} % loop code
+  {\multicitedelim} % sepcode 
+  {\usebibmacro{postnote}\usebibmacro{savepostnote}}%post code
+
+\endinput

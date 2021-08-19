@@ -1,0 +1,54 @@
+% locale strings (for polylingual, but also useful for abbreviations within a language)
+%% section 4.9 of the manual:
+% The base name
+% of the file must be a language name known to the babel/polyglossia packages.
+% however you can also use declare language mapping (see bbx file)
+\ProvidesFile{english-legbib.lbx}[2014/05/07 english with additions]
+
+% there are a lot of "mandatory" stylistic abbreviations (see blue book/indigo book)
+% note for any court there may be an appelate division of that court
+% as much as possible, rules should be made for the aliases to aid in remembering them
+\InheritBibliographyExtras{english}
+
+\NewBibliographyString{of,at,court,ruling,judgement,verdict,document,versus,supremecourt,backrefpage,backrefpages,affirmed,affirming,certioridenied,certiorigranted,reviewed,reviewedonothergrounds,comment,ali,number,argued,decided,article,amendment,constitution,unitedstates,etal,document}
+
+% note: this uses the common ambiguity of referring to the circuit court as the court of appeals
+% in fact the circuit, as defined, has bankruptcy and all the district courts inside it
+% the circuit court is the court of appeals in the circuit
+
+% for the purposes of data, combinations should be rendered as single units
+% for the purpose of typsetting, it is sufficient to do something like the following for a state court: \bibstring{connecticut} \bibstring{circuit} \bibstring{court}, but for database managemant, one would rather have at least conneticutcircuitcourt
+
+\DeclareBibliographyStrings{%
+inherit   = {english},
+of = {{of}{of}},
+at = {{at}{at}},
+supremecourt = {{United States Supreme Court}{S. Ct.}},
+court     = {{court}{court}},
+ruling    = {{ruling}{ruling}},
+judgement = {{judgement}{judgement}}, % might want to spell it judgment?
+verdict   = {{verdict}{verdict}},
+document  = {{document}{doc.}},
+versus    = {{versus}{v.}},
+backrefpage  = {{see p\adddot}{see p\adddot}},
+backrefpages = {{see pp\adddot}{see pp\adddot}},
+affirmed = {{affirmed}{aff'd}},
+affirming = {{affirming}{aff'g}},
+certioridenied = {{certiori denied}{cert.~denied}},
+certiorigranted = {{certiori granted}{cert.~granted}},
+reviewed = {{reviewed}{rev'd}},
+reviewedonothergrounds = {{reviewed on other grounds}{rev'd on other grounds}},
+comment = {{comment}{cmt.}},
+ali = {{American Law Institute}{Amer.\ Law\ Inst.}},
+number = {{Number}{No.}},
+argued = {{Argued}{Arg.}},
+decided = {{Decided}{Dec.}},
+article = {{Article}{Art.}},
+amendment = {{Amendment}{Am.}},
+constitution = {{Constitution}{Const.}},
+unitedstates = {{United States}{U.S.}}, % for whatever reason the space is ignored 
+etal = {{And all}{et al.}},
+document= {{Document}{Dkt.}} %not sure why document is given a k abbreviation, but that is what I've seen
+}
+
+\input{alias}

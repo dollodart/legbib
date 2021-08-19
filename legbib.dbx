@@ -1,0 +1,235 @@
+\ProvidesFile{cases.dbx}
+% data model
+
+%% Entry types
+\DeclareDatamodelEntrytypes{appealcase,
+caselaw,
+counsel,
+exhibit,
+proceeding, % intended for proceedings in the present case (or prior case on appeal)
+externalproceeding, % rarely used, for proceedings in other cases
+opinion,
+restatement, %a restatement is a specialized kind of treatise in use by the U.S. legal system
+statute,
+trialcase,
+constitution}
+
+%% All fields
+\DeclareDatamodelFields[type=field,datatype=literal]{
+ venue, % == court
+ jurisdiction,
+ caseno,
+ edition,
+ no,
+ sectionno,
+ reporter,
+ databasereporter,
+ databaseid,
+ url,
+ publisher,
+ name, % used for statutes
+ title, % used for statutes 
+ code,
+ filedirectory,
+ filename,
+ filesuffix, % redundant, since can infer filesuffix using \filename@parse if undefined
+ filedescription,
+ comment,
+ presort,
+ shorthand, 
+ shorthandshort,
+ casename}
+
+% shorthand and shorthandshort are for citations and repeated citations. 
+% casename is for bibliography entry. 
+% all of these avoid automatic formatting, which can be highly unsatisfactory
+
+% counsel fields
+\DeclareDatamodelFields[type=field, datatype=literal]{
+  firm,
+  credentials, % e.g., Bar License
+  faxnumber,
+  phonenumber,
+  emailaddress,
+  onelineaddress}
+
+\DeclareDatamodelFields[type=list, datatype=name]{
+  plaintiffs,
+  defendants,
+  petitioners,
+  respondents,
+  movant,
+  nonmovant,
+  parties1,
+  parties2,
+  names} % names is used for counsel
+
+\DeclareDatamodelFields[type=field, datatype=date, skipout]{
+  argueddate,
+  decideddate,
+  filingdate,
+  date}
+
+\DeclareDatamodelFields[type=field, datatype=integer]{
+  article, % used for constitution
+  amendment,
+  volume,
+  year,
+  reporterpage,
+  documentno}
+
+\DeclareDatamodelFields[type=field, datatype=range]{
+  pincites, % for non-automatic
+  section}
+
+%% fields defined for all entries
+% many of these are inherited
+\DeclareDatamodelEntryfields{
+  presort,
+  shorthand,
+  shorthandshort}
+
+%% fields defined per entry
+\DeclareDatamodelEntryfields[trialcase]{
+  venue,
+  jurisdiction,
+  caseno,
+  no,
+  databasereporter,
+  databaseid,
+  reporter,
+  plaintiffs,
+  defendants,
+  parties1,
+  parties2,
+  date, %this is the date the trial is held
+% undefined for those cases settled in arbitration/dispositive motions (but those are rarely cited)
+  reporterpage,
+  pincites,
+  volume,
+  year,
+  casename}
+
+\DeclareDatamodelEntryfields[appealcase]{
+  venue,
+  jurisdiction,
+  caseno,
+  no,
+  databasereporter,
+  databaseid,
+  reporter,
+  petitioners,
+  respondents,
+  plaintiffs,
+  defendants,
+  parties1,
+  parties2,
+  date, % date the decision is made 
+  volume,
+  year, % year decision is made
+  reporterpage,
+  pincites,
+  casename}
+
+\DeclareDatamodelEntryfields[caselaw]{
+%caselaw, rather than appealcase, supports urls (though all of them do probably from inheriting the basic data model)
+  venue,
+  jurisdiction,
+  caseno,
+  no,
+  databasereporter,
+  databaseid,
+  reporter,
+  petitioners,
+  respondents,
+  plaintiffs,
+  defendants,
+  parties1,
+  parties2,
+  date, % date the decision is made 
+  volume,
+  year, % year decision is made
+  reporterpage,
+  pincites,
+  url,
+  casename}
+
+\DeclareDatamodelEntryfields[proceeding]{
+  title, % e.g., dismiss
+  fileddate,
+  pincites,
+  documentno,
+  no,
+  movant,
+  nonmovant,
+  url}
+  %motion type? or create new entries. will almost always be dispositive
+  %explicitly declare "crossref" entry?
+
+\DeclareDatamodelEntryfields[externalproceeding]{
+  argueddate,
+  decideddate,
+  pincites,
+  url}
+
+\DeclareDatamodelEntryfields[statute]{
+  name,%optional field
+  publisher,%optional field
+  code,
+  title,
+  section,
+  no,
+  sectionno,
+  year}
+
+\DeclareDatamodelEntryfields[constitution]{
+  article,
+  amendment, % amendments have clauses as well as sections
+  sectionno,
+  pincites
+} % may also want "Preamble", "Articles", "Amendment", "Bill of Rights"
+
+\DeclareDatamodelEntryfields[restatement]{
+  title, % e.g., torts, agency
+  edition,
+  year, % understood to be year of promulgation
+  sectionno,
+  comment,
+  no} % restatements have a lot of document structure levels, like chapter, division, and topic
+% ignore these since everyone just states the section
+% however comment, as a subitem of section, is included
+
+\DeclareDatamodelEntryfields[exhibit]{
+  filedirectory,
+  filename,
+  filesuffix,
+  filedescription,
+  url}
+
+% counsel
+\DeclareDatamodelEntryfields[counsel]{
+  names,
+  firm,
+  credentials,
+  faxnumber,
+  phonenumber,
+  emailaddress,
+  onelineaddress}
+
+%% name parts customization
+%% note some of the macros depend on the default nameparts existing, so they are added to
+%% however this is mostly unnecessary because they don't reverse people's names in legal literature
+%% note that "prefix", as used here, is a title like Dr. or Mr., not like what is used in default biblatex
+%% givenii is for going between given and family, as a middle name 
+% the title and suffix name parts used for parties is generally used for companies, like "American Corp", "LLC"
+% this is different from the use of title for counsel, where it is a job title, and suffix is like Ph.D. or M.D. or J.D.
+\DeclareDatamodelConstant[type=list]{nameparts}{prefix,given,middle,family,suffix,title,contact}
+
+%% inheritance is not specified in the database model file (commands are not defined there)
+
+%% enforce some data model requirements
+\DeclareDatamodelConstraints[trialcase]{
+\constraint[type=mandatory]{
+\constraintfield{defendants}
+\constraintfield{plaintiffs}
+\constraintfield{venue}}}
