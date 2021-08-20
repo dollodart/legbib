@@ -24,7 +24,7 @@ Position locators can also be related to document structure, or they can be
 sections, paragraphs, and other document tree locators (these are called
 fragments in HTML). It is not standard to use position locators other than page
 number, but that is not enforced here. The bibliography entry should have a
-summary of the citation's position locators, to give an overview of how the
+summary of the citations' position locators, to give an overview of how the
 source was used, and this is supported here. Due to difficulties with comparing
 mixed alphanumeric strings in LaTeX, it isn't guaranteed the bibliography will have
 the position locators in order.
@@ -33,8 +33,8 @@ Some may think citations should have explanatory parentheticals. I don't
 consider this to be part of the citation, as it merely elaborates on what the
 citation is being used for, which is what the text doing the citing should do.
 Even explanatory parantheticals that suggest the validity (e.g., Conley v.
-Gibson (overruled in Iqbal, Twombly)) for aren't using data belonging to the
-source, but another one, and so shouldn't be considered part of its citation.
+Gibson (overruled in Iqbal, Twombly)) aren't using data which belongs to the
+source but another one, and so shouldn't be considered part of its citation.
 Therefore, explanatory parentheticals are also not part of the bibliography
 entry for a source.
 
@@ -56,7 +56,7 @@ are almost always what is cited, and on rare occasion someone will reference a
 Findings & Reccomendations from a magistrate judge, though far oftener they
 will simply cite the opinion's citation of the F&R. As a result, most
 citations to specific documents are exclusively for a present case and, on
-appeal, to the trial or lower appeals case(s). As a result, the datamodel
+appeal, to the trial or lower appeals case(s). Here the data model
 distinguishes betweem "externalproceedings" with the externalproceeding entry
 type, where you can specify a particular document by its docket number and
 inherit from an appealcase or trialcase entry, and "caselaw", which is
@@ -101,36 +101,36 @@ entry in some other professions like academic science.
 
 ## Name formatting
 
-This is somewhat related to the datamodel, but as far as the datamodel is
+This is somewhat related to the data model, but as far as the datamodel is
 concerned it just requires defining many name parts. Name lists in Biblatex are
 almost a kind of subentry which allow you to define arbitrary number of name
 parts using the biber backend. Here the bibliography entries are formatted
 based on which fields of the names exist (and therefore what thing the name is
 of, e.g., a person or corporation) and how many names there are. For defining
 counsel contact information to be placed at the beginning or end of a
-proceeding, name lists and complicated formatting are a clear advantage.
-However, case name logic is generally quite simple: it is the last name of the
-first party (if a person) and the entity name otherwise (e.g., government or
-corporation). I included complicated name formatting for case names in the
-bibliography entry so that the bibliography entry would contain more
-information than the citation would, but it is a package option to enable.
+proceeding, name lists and the complicated formatting they allow are clearly
+warranted.  However, case name logic is generally quite simple: it is the last
+name of the first party (if a person) and the entity name otherwise (e.g.,
+government or corporation). I included complicated name formatting for case
+names in the bibliography entry so that the bibliography entry would contain
+more information than the citation would, but it is a package option to enable.
 
 ## Case names 
 
 Generally, though no convention including this one is followed by all courts,
 one can define the following party titles from trial and on appeal:
 
-``
+```
 plaintiffs/defendants -> appellants/appellees -> petitioner/respondent
-``
+```
 
-and then cycle through these, if it reaches an even higher level of removal.
+and then cycle through these, if it reaches an even higher level of appeal.
 Hence it is possible to have, if a case first goes to a state trial court, then
 a state appeal court, then a state supreme court, and finally the supreme
 court, plaintiff-appellant-respondent-appellee and
-defendant-appellee-petitioner-appellant. For every level of removal, there are
-`2^n` possibilities of a parties status. Enumerated with this convention, these
-are
+defendant-appellee-petitioner-appellant. For every level of appeal, there are
+`2^n` possibilities for the parties' titles. Enumerated with the above
+convention these are
 
 ```
 - plaintiff,defendant
@@ -150,9 +150,9 @@ are
   plaintiff-appellee-respondent-appellee,defendant-appellant-petitioner-appellee
 ```
 
-Different courts differ in how they name cases upon appeal. The simplest is an
+Different courts differ in how they order the names upon appeal. The simplest is an
 appeal of a trial decision, but not even this is uniform, with some reversing
-(in the case the defendant appeals) and some not. A given high court may not
+in the case the defendant appeals and some not. It's also possible that a high court may not
 reverse parties if it directly reviews a trial court decision, but will reverse
 parties if it reviews a lower appeals court decision on a trial court decision.
 
@@ -182,14 +182,14 @@ There are several ways to include exhibits using the bibliography database
 manager. One is to includegraphics or includepdf. The technical challenge here
 is in escaping the current mode, since both graphicx and pdfpages commands are
 by default inside the box which is defined by the bibliography entry. I haven't
-solved this problem here, but one can include exhibits within the boundary of
-the bibliography.
+solved this problem, but one can include exhibits within the box of
+the bibliography environment.
 
 Some courts such as the Oregon circuit courts require exhibits to be displayed
 in the main document of the proceeding, but many (such as the federal courts)
 have them external. PACER (and presumably most state court electronic filing
-systems) don't allow embedded files in pdf for security reasons.  Therefore,
-exhibits need to be linked to, either as local files to be downloaded with the
+systems) don't allow embedded files in pdf for security reasons.  Exhibits
+therefore need to be linked to, either as local files to be downloaded with the
 document, or as web links where the exhibits are hosted. Both embedding and
 linking exhibits are supported.
 
@@ -208,7 +208,7 @@ citation to less standard. These are
 ## Overriding default formating by shorthand fields
 
 Invariably edge cases will not be handled satisfactorily. To overcome
-this, the following fields will be literally typed:
+this, the following fields will be used to override otherwise inferred ones:
 
 - pincites: the particular pages (or line numbers or paragraphs or sections or
   other locators), usually inferred from the postnote arguments made to the
@@ -220,7 +220,7 @@ this, the following fields will be literally typed:
 # Sorting
 
 Jurists often want their bibliographies listed in order of importance.
-There are several natural orderings:
+There are at least two orderings for importance:
 
 - The supremacy of the court, which is actually Judge Posner's recommendation
   in his style guide. Source mapping is used to allow automated sorting based
@@ -238,7 +238,12 @@ would likely make a python package that simply substitutes citation commands
 and appends a bibliography by reading a (La)TeX file as a template and writing
 out a filled template: something like Biber but that accomplishes both front
 end and back end.  There is already the bibulous package, which is a python
-bibtex replacement, though it doesn't support arbitrary datamodels.
+bibtex replacement, though it doesn't support arbitrary data models. The only
+runtime data that a bibliography needs are the page numbers, and so the
+motivation for having a LaTeX solution (even a partial one like in Biblatex) is
+low. One can define macros which store the page number at every citation in a
+control sequence which can later be used by the bibliography, following some
+convention like \citekey[a-z] where [a-z] is an alphabetical index. E.g., before LaTeX compiling, change \cite{abckey} to {ABC. Proceedings of ABC. 2000. \edef\abckeya{\thepage}}.
 
 # License
 
