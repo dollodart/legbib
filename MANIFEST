@@ -1,0 +1,34 @@
+The work has the LPPL maintenance status as `maintained`.
+
+Please raise issues at the Github https://github.com/dollodart/legbib
+
+The current maintainer of this work is D. Ollodart.
+
+This work consists of the files
+
+- legbib.dbx
+- legbib.cbx
+- legbib.bbx
+- legbib.sty
+- english-legbib.lbx
+- supremacy.tex
+- alias.tex
+
+and the test files in the test directory
+
+- backref.tex
+- bibstring.tex
+- caselaw.tex
+- casenames.tex
+- categories.tex
+- constitution.tex
+- counsel.tex
+- custom.tex
+- exhibit.tex
+- ibid-idem.tex
+- memorandum.tex
+- postnote.tex
+- related.tex
+- restatement.tex
+- statute.tex
+- tsupremacy.tex
