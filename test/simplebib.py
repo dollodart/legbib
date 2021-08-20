@@ -139,9 +139,6 @@ if __name__ == '__main__':
     citation_entrytype2fmt = dict()
     citation_entrykey2fmt = dict()
 
-    # biggest pain: including \ref and \label to allow LaTeX to construct hyperlinks. this hypermedia can't be emulated otherwise
-    # this and backref are significant advantages to using Biblatex.
-
     def wrap_citation(key, citation):
         label = key + alph[counts[key] - 1]
 
@@ -150,7 +147,16 @@ if __name__ == '__main__':
         except KeyError:
             places[key] = [label]
 
-        return '{' + citation + ' \\label{' + key + alph[counts[key] - 1] + '}' + '}'
+        return ('\\begin{custenv}\\label{' + 
+                key + 
+                alph[counts[key] -1] +
+                '-page}\\hypertarget{\\hyperlink{' +
+                key +
+                '}{' +
+                citation +
+                '}}{' +
+                key + alph[counts[key] - 1]
+                + '}\\end{custenv}')
 
     def formatter_caselaw_citation(key, entry, opts = None, prev=None, ever=None):
         pre = post = None
@@ -242,24 +248,20 @@ if __name__ == '__main__':
     print()
 
     # bibliography
-    # verbose style, keep the same entry type
-#    entrytype2fmt = dict()
-#    entrykey2fmt = dict()
     from collections import defaultdict
     supremacy = defaultdict()
     supremacy.default_factory = 10 
-    #cits = sorted(ever, key=lambda x:(counts[x],supremacy[d[x]['venue']], d[x]['plaintiffs']))
     cits = sorted(ever, key=lambda x:-counts[x]) #,supremacy[d[x]['venue']], d[x]['plaintiffs']))
 
     def formatter_caselaw_bib(key, entry):
         pages = pagecum[key]
         #pages = compress pages into page range (hard to do with section and other numbering mixed in)
         pages = ', ' + ','.join('--'.join(x[0]) for x in sorted(pages)) # need to concatenate
-        backrefs = 'see ' + ','.join('\\ref{' + x + '}' for x in places[key])
+        backrefs = ','.join('\\hyperlink{' + x + '}{\\pageref*{' + key + alph[c] + '-page}}' for c, x in enumerate(places[key]))
 
         fmt = '{plaintiffs} v. {defendants}. {volume}~{reporter}~{reporterpage}' + pages + '. ({venue}, {year}).'
 
-        return fmt.format_map(entry) + backrefs
+        return '\\hypertarget{' + key + '}{' + fmt.format_map(entry) + ' See ' + backrefs + '.}'
 
     bib_entrytype2fmt = dict()
     bib_entrykey2fmt = dict()
