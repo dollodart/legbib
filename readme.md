@@ -20,14 +20,17 @@ reporterpage pinpages (venue year)` format remains standard, it is so
 implemented (but see later about pinpages location).
 
 Citations also have a position locator such as page number or line number.
-Position locators can also be related to document structure, or they can be
-sections, paragraphs, and other document tree locators (these are called
-fragments in HTML). It is not standard to use position locators other than page
-number, but that is not enforced here. The bibliography entry should have a
-summary of the citations' position locators, to give an overview of how the
-source was used, and this is supported here. Due to difficulties with comparing
-mixed alphanumeric strings in LaTeX, it isn't guaranteed the bibliography will have
-the position locators in order.
+Locators can also be related to document structure such as section and
+paragraph numbers which don't have a fixed physical location (if a document is
+rendered in more than one way or is updated over time)---these are called
+fragments in HTML but I will call them structure locators for the purpose of
+locator being either a position or structure locator. It is not standard to use
+locators other than the position locator of page number, but that is not
+enforced here. The bibliography entry should have a summary of the citations'
+locators to give an overview of how the source was used, and this is supported
+here. Due to difficulties with comparing mixed alphanumeric strings in LaTeX,
+it isn't guaranteed the bibliography will have the locators in order, nor will
+they generally be range compressed (see Biblatex issue 1138).
 
 Some may think citations should have explanatory parentheticals. I don't
 consider this to be part of the citation, as it merely elaborates on what the
@@ -38,8 +41,8 @@ source but another one, and so shouldn't be considered part of its citation.
 Therefore, explanatory parentheticals are also not part of the bibliography
 entry for a source.
 
-It is standard to include page number in a position which is after the volume
-of the reporter and before the venue and year in a citation to caselaw. This
+It is standard to include page number in a position which is after the page
+in the reporter and before the venue and year in a citation to caselaw. This
 may be to do with the fact that the paranthetical giving the venue and year is
 not considered necessary for the citation, just as an explanatory paranthetical
 is not necessary. It isn't possible to use the page in the middle of the
