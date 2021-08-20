@@ -246,7 +246,13 @@ runtime data that a bibliography needs are the page numbers, and so the
 motivation for having a LaTeX solution (even a partial one like in Biblatex) is
 low. One can define macros which store the page number at every citation in a
 control sequence which can later be used by the bibliography, following some
-convention like \citekey[a-z] where [a-z] is an alphabetical index. E.g., before LaTeX compiling, change \cite{abckey} to {ABC. Proceedings of ABC. 2000. \edef\abckeya{\thepage}}.
+convention like \citekey[a-z] where [a-z] is an alphabetical index. E.g.,
+before LaTeX compiling, change \cite{abckey} to {ABC. Proceedings of ABC. 2000.
+\edef\abckeya{\thepage}}. For links, one can use the standard LaTeX label/ref
+and if desired hyperref hypertarget/hyperlink, which has the additional
+advantage of supporting \pageref.  A proof of concept python script,
+`simplebib.py`, shows how simply this could be implemented compared to a mixed
+LaTeX and "p-language" (Perl/Python/Lua) package.
 
 # License
 
