@@ -242,6 +242,6 @@ bibtex replacement, though it doesn't support arbitrary datamodels.
 
 # License
 
-This uses the same LPPL 2 which Biblatex uses. This package only extends,
-rather than a modifies, Biblatex, and so the LPPL2 is taken without considering
+This uses the same LPPL 1.3 which Biblatex uses. This package only extends,
+rather than a modifies, Biblatex, and so the LPPL 1.3 is taken without considering
 anything here as "a direct replacement component".
