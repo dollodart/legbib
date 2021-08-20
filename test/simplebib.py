@@ -235,8 +235,6 @@ if __name__ == '__main__':
 
         citation = try_in_order_citation(key, d[key], opts, prev, ever)
         # process citation here
-
-        i = j2
         prev = key
         ever.add(key)
         try:
@@ -244,7 +242,13 @@ if __name__ == '__main__':
         except KeyError:
             counts[key] = 1
 
-        print(wrap_citation(key, citation))
+        cit = wrap_citation(key, citation)
+        r = r[:i] + cit + r[j2+1:]
+        i = j2
+
+    print()
+    print('substituted')
+    print(r)
     print()
 
     # bibliography
